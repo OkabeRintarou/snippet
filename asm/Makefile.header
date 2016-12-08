@@ -1,0 +1,7 @@
+UNAME := $(shell uname)
+ifeq ($(UNAME),Linux)
+	AS := as --32
+	LD := ld
+	ASFLAGS := -g
+	CFLAGS := -g -m32
+endif

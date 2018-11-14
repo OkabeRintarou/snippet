@@ -1,0 +1,28 @@
+import HelloApp.*;
+import org.omg.CosNaming.*;
+import org.omg.CosNaming.NamingContextPackage.*;
+import org.omg.CORBA.*;
+
+public class HelloClient {
+	public static void main(String[] args) {
+		try {
+			ORB orb = ORB.init(args,null);
+
+			// get the root naming context
+			org.omg.CORBA.Object objRef =
+				orb.resolve_initial_references("NameService");
+			NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
+
+			// resolve the Object Reference in Naming
+			String name = "Hello";
+			Hello helloImpl = HelloHelper.narrow(ncRef.resolve_str(name));
+
+			System.out.println("Obtained a handle on server object: " + helloImpl);
+			System.out.println(helloImpl.sayHello());
+			helloImpl.shutdown();
+		} catch (Exception e) {
+			System.out.println("ERROR: " + e);
+			e.printStackTrace(System.out);
+		}
+	}
+}

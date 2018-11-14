@@ -1,0 +1,12 @@
+// Step1: Declare the CORBA IDL module
+// CORBA的模块与Java的package概念类似,每一个模块被映射为Java语言中的一个package
+module HelloApp 
+{
+	// Step2: Declare the interface
+	interface Hello
+	{
+		// Step3: Declare the Operations
+		string sayHello();
+		oneway void shutdown();
+	};
+};

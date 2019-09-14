@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package example;
+
+message RpcMeta {
+    string service_name = 1;
+    string method_name = 2;
+    int32 data_size = 3;
+}

@@ -2,13 +2,13 @@ all:kernel
 
 
 kernel:boot.o kernel.o
-	ld -m elf_i386 -T linker.ld -o $@  boot.o kernel.o
+	ld -m elf_i386 -T linker.ld -o $@  boot.o kernel.o -nostdlib
 
 boot.o:boot.s
 	as --32 -o $@ $<
 
 kernel.o:kernel.c
-	gcc -c -m32 -o $@ -std=gnu99 -ffreestanding -O2 -Wall -Wextra $<
+	gcc -c -m32 -o $@ -std=gnu99 -ffreestanding -fno-builtin -O2 -Wall -Wextra $<
 	
 qemu:kernel
 	qemu-system-i386 -kernel kernel

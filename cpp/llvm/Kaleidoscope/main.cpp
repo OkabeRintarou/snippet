@@ -1,38 +1,52 @@
 #include <cstdio>
+#include <llvm/IR/Function.h>
 #include "lexer.h"
 #include "parser.h"
+#include "codegen.h"
 
-static void HandleDefinition()
-{
-    if(ParseDefinition()) {
-        fprintf(stderr,"Parsed a function definition.\n");
+using namespace llvm;
+
+static void HandleDefinition() {
+    if (auto FnAST = ParseDefinition()) {
+        if (auto *FnIR = FnAST->codegen()) {
+            fprintf(stderr, "Read function definition:");
+            FnIR->print(errs());
+            fprintf(stderr, "\n");
+        }
     } else {
         getNextToken();
     }
 }
 
-static void HandleExtern()
-{
-    if(ParseExtern()) {
-        fprintf(stderr,"Parsed an extern,\n");
+static void HandleExtern() {
+    if (auto ProtoAST = ParseExtern()) {
+        if (auto *FnIR = ProtoAST->codegen()) {
+            fprintf(stderr, "Read extern: ");
+            FnIR->print(errs());
+            fprintf(stderr, "\n");
+        }
+
     } else {
         getNextToken();
     }
 }
 
-static void HandleTopLevelExpression()
-{
-    if(ParseTopLevelExpr()) {
-        fprintf(stderr,"Parsed a top-level expr.\n");
+static void HandleTopLevelExpression() {
+    if (auto FnAST = ParseTopLevelExpr()) {
+        if (auto *FnIR = FnAST->codegen()) {
+            fprintf(stderr, "Read top-level expression:");
+            FnIR->print(errs());
+            fprintf(stderr, "\n");
+            FnIR->eraseFromParent();
+        }
     } else {
         getNextToken();
     }
 }
 
-static void MainLoop()
-{
-    for(;;) {
-        fprintf(stderr,"ready>");
+static void MainLoop() {
+    for (;;) {
+        fprintf(stderr, "ready>");
         switch (CurTok) {
             case tok_eof:
                 return;
@@ -52,12 +66,14 @@ static void MainLoop()
     }
 }
 
-int main(int argc,char* argv[])
-{
+int main(int argc, char *argv[]) {
     // freopen("test/fib.kal","r",stdin);
-    fprintf(stderr,"read>");
+    fprintf(stderr, "read>");
     getNextToken();
+
+    BeginCodegen();
     MainLoop();
+    EndCodegen();
 
     return 0;
 }

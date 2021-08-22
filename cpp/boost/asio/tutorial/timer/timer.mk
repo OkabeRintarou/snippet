@@ -1,5 +1,5 @@
 CXXFLAGS = -O0 -g -Wall
-LDFLAGS = -lboost_system
+LDFLAGS = -lboost_system -lpthread -lboost_thread
 
 $(BINARIES):
 	g++ $(CXXFLAGS) -o $@ $(filter %.cc,$^) $(LDFLAGS)

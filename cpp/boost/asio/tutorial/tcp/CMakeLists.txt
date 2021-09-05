@@ -10,3 +10,6 @@ target_link_libraries(tcp_server boost_thread pthread)
 
 add_executable(async_tcp_server async_server.cpp)
 target_link_libraries(async_tcp_server boost_thread pthread)
+
+add_executable(chat_server chat_server.cpp)
+target_link_libraries(chat_server boost_system pthread)

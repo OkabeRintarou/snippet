@@ -1,0 +1,6 @@
+-sname hello_server
+
+-setcookie hello_server_cookie
+
++K true
++A30

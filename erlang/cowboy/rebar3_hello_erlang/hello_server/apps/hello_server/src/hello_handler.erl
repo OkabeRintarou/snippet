@@ -3,7 +3,6 @@
 -export([init/2]).
 
 init(Req, State) ->
-	io:format("name: ~p~n", [cowboy_req:binding(name, Req, "World")]),
 	Req1 = cowboy_req:reply(
 			 200,
 			 #{<<"content-type">> => <<"text/plain">>},

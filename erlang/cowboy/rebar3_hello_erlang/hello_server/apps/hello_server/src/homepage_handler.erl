@@ -1,12 +1,11 @@
--module(hello_handler).
+-module(homepage_handler).
 -behavior(cowboy_handler).
 -export([init/2]).
 
 init(Req, State) ->
-	io:format("name: ~p~n", [cowboy_req:binding(name, Req, "World")]),
 	Req1 = cowboy_req:reply(
 			 200,
 			 #{<<"content-type">> => <<"text/plain">>},
-			 erlang:iolist_to_binary([<<"hello, ">>, cowboy_req:binding(name, Req, "World")]),
+			 <<"Homepage">>,
 			 Req),
 	{ok, Req1, State}.

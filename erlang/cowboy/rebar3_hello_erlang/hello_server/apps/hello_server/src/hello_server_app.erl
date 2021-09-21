@@ -12,8 +12,8 @@
 start(_StartType, _StartArgs) ->
 	Dispatch = cowboy_router:compile([
 		{<<"localhost">>, [
-				{<<"/">>, homepage_handler, []},
-				{<<"/hello/[:name]">>, hello_handler, []}
+				{<<"/">>, cowboy_static, {priv_file, hello_server, "static/index.html"}},
+				{<<"/ping">>, ping_handler, []}
 		]}
 	]),
 	{ok, _} = cowboy:start_clear(

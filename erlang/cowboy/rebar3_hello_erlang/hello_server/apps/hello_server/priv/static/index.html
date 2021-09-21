@@ -1,0 +1,28 @@
+<html>
+<head>
+<title>Homepage</title>
+
+<script>
+
+function append(event) {
+
+}
+
+
+function httpGet(url) {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open("GET", url, false);
+	xmlHttp.send("ping");
+	return xmlHttp.responseText;
+}
+
+function ping() {
+	httpGet("/ping");
+}
+
+</script>
+</head>
+<body>
+<button id="ping" onclick='ping()'>Ping</button>
+</body>
+</html>

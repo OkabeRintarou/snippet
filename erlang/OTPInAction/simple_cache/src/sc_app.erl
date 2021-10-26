@@ -6,7 +6,7 @@
 
 start(_StartType, _StartArgs) ->
     sc_store:init(),
-    case sc_sup:start_link() of
+    case sc_element_sup:start_link() of
         {ok, Pid} ->
             {ok, Pid};
         Other ->

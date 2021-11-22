@@ -11,5 +11,8 @@ include_directories(/usr/include/libdrm)
 add_executable(basic_test basic_test.cc amdgpu_device.cc)
 target_link_libraries(basic_test gtest_main drm drm_amdgpu)
 
+add_executable(bo_test bo_test.cc amdgpu_device.cc)
+target_link_libraries(bo_test gtest_main drm drm_amdgpu)
+
 include(GoogleTest)
 gtest_discover_tests(basic_test)

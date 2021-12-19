@@ -1,0 +1,51 @@
+#!/usr/bin/env escript
+main([ProcessCount, DelayMilliseconds]) ->
+    try
+        {Process, Delay} = {list_to_integer(ProcessCount), list_to_integer(DelayMilliseconds)},
+        {ok, _Pid} = gen_server_delay_response:start_link(),
+        {A1, B1, C1} = os:timestamp(),
+        StartTime = (A1 * 1000000 + B1) * 1000000 + C1,
+        SuccCount = start_request(self(), Process, Delay, Process),
+        case SuccCount =:= Process of
+            true ->
+                io:format("====== SUCC~n");
+            false ->
+                io:format("====== FAIL~n")
+        end,
+        {A2, B2, C2} = os:timestamp(),
+        EndTime = (A2 * 1000000 + B2) * 1000000 + C2,
+        io:format("Cost: ~p ms~n", [(EndTime - StartTime) / 1000])
+    catch
+        _:_:Stacktrace ->
+            erlang:display(Stacktrace)
+    end;
+main(_) ->
+    usage().
+
+start_request(_, 0, _, N) ->
+    collect_response(N, 0);
+start_request(Pid, N, Delay, Total) ->
+    spawn_link(fun() ->
+                  try
+                      hello = gen_server_delay_response:delay(Delay, hello),
+                      Pid ! ok
+                  catch
+                      _:_ ->
+                          Pid ! error
+                  end
+               end),
+    start_request(Pid, N - 1, Delay, Total).
+
+collect_response(0, Succ) ->
+    Succ;
+collect_response(N, Succ) ->
+    receive
+        ok ->
+            collect_response(N - 1, Succ + 1);
+        error ->
+            collect_response(N - 1, Succ)
+    end.
+
+usage() ->
+    io:format("usage: delay_client process_count delay_milliseconds~n"),
+    halt(1).

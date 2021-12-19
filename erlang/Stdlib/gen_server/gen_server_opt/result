@@ -1,0 +1,12 @@
+%% 12  Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz
+%% Linux syl 5.11.0-37-generic #41~20.04.2-Ubuntu SMP Fri Sep 24 09:06:38 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
+
+======gen_server: Times:50000 Cost:641.884 ms
+======gen_server: Times:50000 Cost:576.929 ms
+======gen_server: Times:50000 Cost:411.197 ms
+======gen_server: Times:50000 Cost:410.137 ms
+======gen_server: Times:50000 Cost:433.256 ms
+======gen_server: Times:50000 Cost:435.903 ms
+======gen_server: Times:50000 Cost:245.426 ms
+======gen_server: Times:50000 Cost:2.433 ms
+======gen_server: Times:50000 Cost:184.967 ms

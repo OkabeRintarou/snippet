@@ -1,0 +1,21 @@
+#!/usr/bin/env escript
+
+main(_) ->
+	test_for_gen_server:test1(50000),
+	timer:sleep(1000),
+	test_for_gen_server:test2(50000),
+	timer:sleep(1000),
+	test_for_gen_server:test3(50000),
+	timer:sleep(1000),
+	test_for_gen_server:test4(50000),
+	timer:sleep(1000),
+	test_for_gen_server:test5(50000),
+	timer:sleep(1000),
+	test_for_gen_server:test6(50000),
+	timer:sleep(1000),
+	test_for_gen_server:test7(50000),
+	timer:sleep(1000),
+	test_for_gen_server:test8(50000),
+	timer:sleep(1000),
+	test_for_gen_server:test9(50000),
+	timer:sleep(1000).

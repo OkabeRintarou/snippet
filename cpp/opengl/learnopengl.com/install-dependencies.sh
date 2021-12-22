@@ -17,7 +17,7 @@ function install_glfw()
 	cmake -DCMAKE_BUILD_TYPE=Release ..
 	make -j16
 	make install
-	m -rf ./glfw
+	rm -rf ./glfw
 	echo "Done"
 }
 

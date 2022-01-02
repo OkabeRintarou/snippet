@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13.4)
-project(TestLLVM)
+project(TestLLVM CXX)
 
 find_package(LLVM REQUIRED CONFIG)
 
@@ -10,9 +10,12 @@ include_directories(${LLVM_INCLUDE_DIRS})
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 
+set(BINARY ${CMAKE_PROJECT_NAME})
+file(GLOB SOURCES  *.cpp)
+set(SOURCES ${SOURCES})
 
-add_executable(test_llvm main.cpp small_vector.cpp)
+add_executable(${BINARY} main.cpp test_small_vector.cpp)
 
 llvm_map_components_to_libnames(llvm_libs support core irreader)
 
-target_link_libraries(test_llvm ${llvm_libs})
+target_link_libraries(${BINARY} ${llvm_libs} gtest)

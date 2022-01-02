@@ -11,7 +11,7 @@ separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 
 set(BINARY ${CMAKE_PROJECT_NAME})
-file(GLOB SOURCES  *.cpp)
+file(GLOB SOURCES  main.cpp ADT/*.cpp)
 set(SOURCES ${SOURCES})
 
 add_executable(${BINARY} ${SOURCES})

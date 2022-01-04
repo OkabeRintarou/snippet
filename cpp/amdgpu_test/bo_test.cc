@@ -53,6 +53,28 @@ bool BoTest::init() {
 	return true;
 }
 
+bool BoTest::fini() {
+    int r;
+
+    r = amdgpu_bo_va_op(buffer_handle_, 0, BUFFER_SIZE,
+                        virtual_mc_base_address_, 0, AMDGPU_VA_OP_UNMAP);
+
+    if (r) {
+        return false;
+    }
+
+    r = amdgpu_va_range_free(va_handle_);
+    if (r) {
+        return false;
+    }
+
+    r = amdgpu_bo_free(buffer_handle_);
+    if (r) {
+        return false;
+    }
+    return true;
+}
+
 TEST_F(BoTest, MapUnmapTest) {
     uint32_t *ptr;
     int r;

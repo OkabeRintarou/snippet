@@ -10,6 +10,7 @@ protected:
 	}
 
 	virtual void TearDown() override {
+        ASSERT_TRUE(fini());
 		amdgpu_device_deinitialize(device_handle_);	
 	}
 
@@ -27,4 +28,5 @@ protected:
     amdgpu_va_handle va_handle_;
 private:
 	bool init();
+    bool fini();
 };

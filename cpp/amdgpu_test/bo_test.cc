@@ -39,3 +39,51 @@ TEST_F(BoTest, MapUnmapTest) {
         typed_ptr[i] = 0xdeadbeaf;
     }
 }
+
+TEST_F(BoTest, MemoryAllocTest) {
+
+    EXPECT_FALSE(devices_.empty());
+    Device &device = devices_.front();
+    const uint64_t BUFFER_SIZE = 4096;
+    const uint64_t BUFFER_ALIGNMENT = 4096;
+
+    {
+    // Test visible VRAM
+    Result<BufferObject, int> bo_result = 
+        device.alloc_bo(BUFFER_SIZE, BUFFER_ALIGNMENT, 
+                        AMDGPU_GEM_DOMAIN_VRAM, AMDGPU_GEM_CREATE_CPU_ACCESS_REQUIRED);
+    EXPECT_TRUE(bo_result.is_ok());
+    BufferObject &&bo = bo_result.take_ok_value();
+    (void)bo;
+    }
+
+    {
+    // Test invisible VRAM
+    Result<BufferObject, int> bo_result = 
+        device.alloc_bo(BUFFER_SIZE, BUFFER_ALIGNMENT, 
+                        AMDGPU_GEM_DOMAIN_VRAM, AMDGPU_GEM_CREATE_NO_CPU_ACCESS);
+    EXPECT_TRUE(bo_result.is_ok());
+    BufferObject &&bo = bo_result.take_ok_value();
+    (void)bo;
+    }
+
+    {
+    // Test GART Cacheable
+    Result<BufferObject, int> bo_result = 
+        device.alloc_bo(BUFFER_SIZE, BUFFER_ALIGNMENT, 
+                        AMDGPU_GEM_DOMAIN_GTT, 0);
+    EXPECT_TRUE(bo_result.is_ok());
+    BufferObject &&bo = bo_result.take_ok_value();
+    (void)bo;
+    }
+
+    {
+    // Test GART USWC
+    Result<BufferObject, int> bo_result = 
+        device.alloc_bo(BUFFER_SIZE, BUFFER_ALIGNMENT, 
+                        AMDGPU_GEM_DOMAIN_GTT, AMDGPU_GEM_CREATE_CPU_GTT_USWC);
+    EXPECT_TRUE(bo_result.is_ok());
+    BufferObject &&bo = bo_result.take_ok_value();
+    (void)bo;
+    }
+}

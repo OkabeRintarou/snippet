@@ -7,9 +7,14 @@
 #include <xf86drm.h>
 #include "amdgpu_device.h"
 
-namespace amdgpu {
+using namespace amdgpu;
 
-bool open_devices(Devices &devices, bool open_render_node) {
+bool Devices::unload(Devices &devices) {
+    // TODO: unload devices
+    return true;
+}
+
+bool Devices::load(Devices &devices, bool open_render_node) {
 
 	const int MAX_CARDS_SUPPORTED = 128;
 	drmDevicePtr drm_devices[MAX_CARDS_SUPPORTED];
@@ -53,8 +58,25 @@ bool open_devices(Devices &devices, bool open_render_node) {
 			continue;
 		}
 
-		devices.add(fd);
+        int r;
+        uint32_t major_version, minor_version;
+        amdgpu_device_handle device_handle;
+        r = amdgpu_device_initialize(fd, &major_version, &minor_version, &device_handle);
+        if (r) {
+            // TODO: add error log
+            drmFreeVersion(version);
+            close(fd);
+        }
 
+        amdgpu_gpu_info gpu_info{0};
+        r = amdgpu_query_gpu_info(device_handle, &gpu_info);
+        if (r) {
+            // TODO: add error log
+            drmFreeVersion(version);
+            close(fd);
+        }
+
+        devices.emplace_back(fd, device_handle);        
 		drmFreeVersion(version);
 	}
 
@@ -65,8 +87,27 @@ bool open_devices(Devices &devices, bool open_render_node) {
 
 Devices::~Devices() {
 	for (size_t i = 0; i < size(); i++) {
-		close(this->operator[](i));
+        const Device& d = (*this)[i];
+		close(d.fd());
 	}
 }
 
-} // namespace amdgpu
+Result<BufferObject, int> Device::alloc_bo(amdgpu_bo_alloc_request req) {
+    amdgpu_bo_handle bo_handle;
+    int r = amdgpu_bo_alloc(handle_, &req, &bo_handle);
+    if (r) {
+        return make_err(r);
+    }
+    
+    return make_ok(BufferObject(handle_, bo_handle, req.alloc_size, req.phys_alignment));
+}
+
+Result<BufferObject, int> Device::alloc_bo(uint64_t alloc_size, uint64_t alignment, uint32_t preferred_heap, uint64_t flags) {
+    amdgpu_bo_alloc_request req{0};
+    req.alloc_size = alloc_size;
+    req.phys_alignment = alignment;
+    req.preferred_heap = preferred_heap;
+    req.flags = flags;
+    
+    return alloc_bo(req);
+}

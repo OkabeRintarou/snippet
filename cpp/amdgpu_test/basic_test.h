@@ -10,17 +10,11 @@ protected:
 	}
 
 	virtual void TearDown() override {
-		amdgpu_device_deinitialize(device_handle_);	
+        ASSERT_TRUE(fini());
 	}
 
 	amdgpu::Devices devices_;
-
-	amdgpu_device_handle device_handle_;
-	uint32_t major_version_;
-	uint32_t minor_version_;
-	uint32_t family_id_;
-	uint32_t chip_id_;
-	uint32_t chip_rev_;
 private:
 	bool init();
+    bool fini();
 };

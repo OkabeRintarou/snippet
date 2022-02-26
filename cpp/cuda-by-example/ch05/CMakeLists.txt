@@ -1,0 +1,6 @@
+add_executable(vectorRedux vectorRedux.cu)
+add_executable(ripple ripple.cu)
+target_link_libraries(ripple GL glut)
+add_executable(dot dot.cu)
+add_executable(shared_bitmap shared_bitmap.cu)
+target_link_libraries(shared_bitmap GL glut)

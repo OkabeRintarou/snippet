@@ -15,3 +15,4 @@ include_directories(common)
 
 add_subdirectory(ch03)
 add_subdirectory(ch04)
+add_subdirectory(ch05)

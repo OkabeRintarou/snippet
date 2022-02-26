@@ -11,4 +11,7 @@ set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 
 project(cuda-by-example LANGUAGES CXX CUDA)
 
+include_directories(common)
+
 add_subdirectory(ch03)
+add_subdirectory(ch04)

@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 #include <type_traits>
 #include <vector>
 
@@ -74,4 +75,11 @@ __global__ void float_to_color(unsigned char *optr, const float *out_src) {
   optr[offset * 4 + 1] = value(m1, m2, h);
   optr[offset * 4 + 2] = value(m1, m2, h - 120);
   optr[offset * 4 + 3] = 255;
+}
+
+void *big_random_block(int size) {
+  auto data = new unsigned char[size];
+  for (int i = 0; i < size; i++)
+    data[i] = rand();
+  return data;
 }

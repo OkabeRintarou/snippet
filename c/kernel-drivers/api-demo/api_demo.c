@@ -4,15 +4,18 @@
 #include <linux/module.h>
 #include <linux/sched.h>
 #include "test_list.h"
+#include "test_spin_lock.h"
 
 static int kernel_api_demo_init(void) {
-	test_list();
+	test_spin_lock_init();
 	return 0;
 }
 
 static void kernel_api_demo_exit(void) {
+	test_spin_lock_fini();
 }
 
 module_init(kernel_api_demo_init);
 module_exit(kernel_api_demo_exit);
 MODULE_LICENSE("GPL v2");
+MODULE_AUTHOR("syl");

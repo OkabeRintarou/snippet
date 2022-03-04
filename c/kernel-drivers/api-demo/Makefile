@@ -2,7 +2,7 @@ MODULE=kernel_api_example
 
 obj-m+=$(MODULE).o 
 $(MODULE)-objs := api_demo.o	\
-	test_list.o test_spin_lock.o
+	test_list.o test_spin_lock.o test_dma_fence.o
 
 KERNELDIR=/lib/modules/$(shell uname -r)/build
 
@@ -12,4 +12,4 @@ all:
 
 .PHONY:clean
 clean:
-	@rm *.o *.ko *.mod *.order *.symvers *.mod.c *.dwo .*.cmd
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean 

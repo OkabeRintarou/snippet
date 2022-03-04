@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <amdgpu.h>
 #include "result.h"
 
@@ -44,6 +45,12 @@ public:
         void clear() {
             ptr_ = nullptr;
             size_ = 0;
+        }
+
+        void fill(int c = 0) {
+            if (ptr_) {
+                memset(ptr_, c, size_);
+            }
         }
         operator bool() const { return ptr_ != nullptr; }
 
@@ -101,6 +108,11 @@ public:
         }
         return *this;
     }
+
+    uint64_t gpu_address() { return virtual_mc_base_address_; }
+    const uint64_t gpu_address() const { return virtual_mc_base_address_; }
+    amdgpu_bo_handle bo_handle() { return bo_handle_; }
+    const amdgpu_bo_handle bo_handle() const { return bo_handle_; }
 private:
     BufferObject(amdgpu_device_handle device_handle, amdgpu_bo_handle bo_handle, 
                 uint64_t bo_size, uint64_t bo_align) 

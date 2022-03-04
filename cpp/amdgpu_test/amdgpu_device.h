@@ -4,6 +4,7 @@
 #include <amdgpu_drm.h>
 #include <vector>
 #include "amdgpu_bo.h"
+#include "amdgpu_context.h"
 #include "result.h"
 
 namespace amdgpu {
@@ -23,15 +24,19 @@ public:
     const int fd() const { return fd_; }
     amdgpu_device_handle raw_handle() const { return handle_; }
 
+    const DeviceInfo& device_info() const { return device_info_; }
+
     Result<BufferObject, int> alloc_bo(amdgpu_bo_alloc_request req);
     Result<BufferObject, int> alloc_bo(uint64_t alloc_size, uint64_t alignment = 0, uint32_t preferred_heap = AMDGPU_GEM_DOMAIN_GTT, uint64_t flags = 0);
 
+    Result<Context, int> alloc_context();
 private:
     Device() = default;
     friend class Devices;
 
     int fd_ = -1;
     amdgpu_device_handle handle_;
+    DeviceInfo device_info_;
 };
 
 class Devices : private std::vector<Device> {
@@ -55,6 +60,5 @@ public:
 
 	~Devices();
 };
-
 
 }

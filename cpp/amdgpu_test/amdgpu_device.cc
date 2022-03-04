@@ -77,6 +77,11 @@ bool Devices::load(Devices &devices, bool open_render_node) {
         }
 
         devices.emplace_back(fd, device_handle);        
+        Device &d = devices.back();
+        d.device_info_.major_version = major_version;
+        d.device_info_.minor_version = minor_version;
+        d.device_info_.gpu_info = gpu_info;
+
 		drmFreeVersion(version);
 	}
 
@@ -110,4 +115,14 @@ Result<BufferObject, int> Device::alloc_bo(uint64_t alloc_size, uint64_t alignme
     req.flags = flags;
     
     return alloc_bo(req);
+}
+
+Result<Context, int> Device::alloc_context() {
+    amdgpu_context_handle context_handle;
+
+    int r = amdgpu_cs_ctx_create(handle_, &context_handle);
+    if (r) {
+        return make_err(r);
+    }
+    return make_ok(Context{context_handle});
 }

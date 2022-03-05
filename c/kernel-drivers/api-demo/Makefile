@@ -2,7 +2,8 @@ MODULE=kernel_api_example
 
 obj-m+=$(MODULE).o 
 $(MODULE)-objs := api_demo.o	\
-	test_list.o test_spin_lock.o test_dma_fence.o test_kmem_cache.o
+	test_list.o test_spin_lock.o test_dma_fence.o test_kmem_cache.o \
+	test_percpu.o
 
 KERNELDIR=/lib/modules/$(shell uname -r)/build
 

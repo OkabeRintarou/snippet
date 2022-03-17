@@ -1,0 +1,2 @@
+add_executable(convolution_serial convolution_serial.cpp)
+target_link_libraries(convolution_serial common)

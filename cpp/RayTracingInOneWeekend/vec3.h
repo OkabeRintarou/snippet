@@ -46,6 +46,10 @@ inline vec3 operator*(const vec3 &lhs, float v) {
     return vec3(lhs[0] * v, lhs[1] * v, lhs[2] * v);
 }
 
+inline vec3 operator*(float v, const vec3 &rhs) {
+    return rhs * v;
+}
+
 inline vec3 operator/(const vec3 &lhs, const vec3 &rhs) {
     return vec3(lhs[0] / rhs[0], lhs[1] / rhs[1], lhs[2] / rhs[2]);
 }

@@ -1,0 +1,2 @@
+add_executable(reduce_opt reduce_opt.cu)
+target_link_libraries(reduce_opt common)

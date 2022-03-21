@@ -1,1 +1,1 @@
-add_library(common STATIC timer.cpp file_reader.cpp)
+add_library(common STATIC timer.cpp file_reader.cpp util.cpp)

@@ -1,0 +1,6 @@
+add_executable(checkDimension checkDimension.cu)
+add_executable(checkThreadIndex checkThreadIndex.cu)
+add_executable(defineGridBlock defineGridBlock.cu)
+add_executable(sumArraysOnHost sumArraysOnHost.cu)
+add_executable(sumArraysOnGPU sumArraysOnGPU.cu)
+add_executable(sumMatrixOnGPU-2D-grid-2D-block sumMatrixOnGPU-2D-grid-2D-block.cu)

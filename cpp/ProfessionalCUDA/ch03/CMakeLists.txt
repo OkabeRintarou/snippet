@@ -1,0 +1,3 @@
+add_executable(simpleDivergence simpleDivergence.cu)
+target_link_libraries(simpleDivergence common)
+add_executable(nestedHelloWorld nestedHelloWorld.cu)

@@ -8,9 +8,10 @@
 #include "test_dma_fence.h"
 #include "test_kmem_cache.h"
 #include "test_percpu.h"
+#include "test_container_of.h"
 
 static int kernel_api_demo_init(void) {
-	test_percpu();
+	test_container_of();
 	return 0;
 }
 

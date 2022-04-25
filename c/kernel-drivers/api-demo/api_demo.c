@@ -9,9 +9,10 @@
 #include "test_kmem_cache.h"
 #include "test_percpu.h"
 #include "test_container_of.h"
+#include "test_wait_queue.h"
 
 static int kernel_api_demo_init(void) {
-	test_container_of();
+	test_wait_queue();
 	return 0;
 }
 

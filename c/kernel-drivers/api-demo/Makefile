@@ -5,12 +5,14 @@ $(MODULE)-objs := api_demo.o	\
 	test_list.o test_spin_lock.o test_dma_fence.o test_kmem_cache.o \
 	test_percpu.o
 
-KERNELDIR=/lib/modules/$(shell uname -r)/build
-
 PWD:=$(shell pwd)
-all:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules
+KERNEL_DIR ?=/lib/modules/$(shell uname -r)/build
+BUILD_DIR ?= $(PWD)/build
+BUILD_DIR_MAKEFILE ?= $(PWD)/build/Makefile
+
+default:
+	$(MAKE) -C $(KERNEL_DIR) M=$(BUILD_DIR) src=$(PWD) modules
 
 .PHONY:clean
 clean:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean 
+	$(MAKE) -C $(KERNEL_DIR) M=$(BUILD_DIR) src=$(PWD) clean 

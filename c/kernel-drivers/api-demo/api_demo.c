@@ -10,13 +10,15 @@
 #include "test_percpu.h"
 #include "test_container_of.h"
 #include "test_wait_queue.h"
+#include "test_timer.h"
 
 static int kernel_api_demo_init(void) {
-	test_wait_queue();
-	return 0;
+  test_timer_init();
+  return 0;
 }
 
 static void kernel_api_demo_exit(void) {
+  test_timer_fini();
 }
 
 module_init(kernel_api_demo_init);

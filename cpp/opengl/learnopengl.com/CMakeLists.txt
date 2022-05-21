@@ -3,4 +3,7 @@ project(opengl)
 
 set(CMAKE_CXX_STANDARD 17)
 
+include_directories(Common)
+add_subdirectory(Common)
 add_subdirectory(GettingStarted)
+add_subdirectory(Textures)

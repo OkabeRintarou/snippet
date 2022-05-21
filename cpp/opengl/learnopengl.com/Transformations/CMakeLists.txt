@@ -1,0 +1,2 @@
+add_executable(Transformations Transformations.cc)
+target_link_libraries(Transformations Common)

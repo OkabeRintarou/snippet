@@ -1,0 +1,2 @@
+add_executable(CoordinateSystems CoordinateSystems.cc)
+target_link_libraries(CoordinateSystems Common)

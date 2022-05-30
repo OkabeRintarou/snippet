@@ -1,6 +1,13 @@
 #include "Context.h"
 #include <iostream>
 
+static void key_callback(GLFWwindow *window, int key, int scancode, int action,
+                  int mode) {
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, GL_TRUE);
+  }
+}
+
 std::optional<Context> Context::init(int width, int height, const char *title) {
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -9,13 +16,14 @@ std::optional<Context> Context::init(int width, int height, const char *title) {
   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
   GLFWwindow *window =
-      glfwCreateWindow(width, height, "LearnOpenGL", nullptr, nullptr);
+      glfwCreateWindow(width, height, title, nullptr, nullptr);
   if (window == nullptr) {
     std::cerr << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
     return std::nullopt;
   }
 
+  glfwSetKeyCallback(window, key_callback);
   glfwMakeContextCurrent(window);
 
   glewExperimental = GL_TRUE;

@@ -1,13 +1,8 @@
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 #include "Context.h"
-#include "ShaderManager.h"
-#include <cmath>
+#include "Shader.h"
+#include "Texture2D.h"
 #include <iostream>
-
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include <stb_image.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -53,76 +48,24 @@ int main() {
     std::cerr << "Fail to init context" << std::endl;
     return -1;
   }
+
   // compile and link shader
-  ShaderManager &sm = ctx->shader_manager();
-  if (auto shader = sm.load(shader_source::from_string, shader_type::vertex,
-                            vertexShaderSource);
-      !shader) {
-    std::cerr << "Fail to load vertex shader: " << shader.err_value()
-              << std::endl;
+  Shader shader(shader_source::from_string, vertexShaderSource, fragmentShaderSource);
+  if (!shader.is_valid()) {
+    std::cout << shader.message() << std::endl;
     return -1;
   }
-  if (auto shader = sm.load(shader_source::from_string, shader_type::fragment,
-                            fragmentShaderSource);
-      !shader) {
-    std::cerr << "Fail to load fragment shader: " << shader.err_value()
-              << std::endl;
-    return -1;
-  }
-  auto pgr = sm.link();
-  if (!pgr) {
-    std::cout << "Fail to link program shader: " << pgr.err_value()
-              << std::endl;
-    return -1;
-  }
-  GLuint shader_program = pgr.ok_value();
 
-  unsigned texture1, texture2;
-
-  // texture1
-  // --------
-  glGenTextures(1, &texture1);
-  glBindTexture(GL_TEXTURE_2D, texture1);
-  // set the texture1 wrapping/filtering options(on the currently bound texture1
-  // object)
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  int img_width, img_height, img_channels;
-  unsigned char *img_data =
-      stbi_load("../../Resources/Textures/container.jpg", &img_width,
-                &img_height, &img_channels, 0);
-  if (!img_data) {
-    std::cerr << "Fail to load image container.jpg" << std::endl;
+  Texture2D texture1("../../Resources/Textures/container.jpg");
+  Texture2D texture2("../../Resources/Textures/awesomeface.png");
+  if (!texture1.is_valid()) {
+    std::cerr << texture1.message() << std::endl;
     return -1;
   }
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img_width, img_height, 0, GL_RGB,
-               GL_UNSIGNED_BYTE, img_data);
-  glGenerateMipmap(GL_TEXTURE_2D);
-  stbi_image_free(img_data);
-
-  // texture2
-  // --------
-  glGenTextures(1, &texture2);
-  glBindTexture(GL_TEXTURE_2D, texture2);
-  // set the texture wrapping parameters
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  // set texture filtering parameters
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  img_data = stbi_load("../../Resources/Textures/awesomeface.png", &img_width,
-                       &img_height, &img_channels, 0);
-  if (!img_data) {
-    std::cerr << "Fail to load image awesomeface.png" << std::endl;
+  if (!texture2.is_valid()) {
+    std::cerr << texture2.message() << std::endl;
     return -1;
   }
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img_width, img_height, 0, GL_RGBA,
-               GL_UNSIGNED_BYTE, img_data);
-  glGenerateMipmap(GL_TEXTURE_2D);
-  stbi_image_free(img_data);
 
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
@@ -194,9 +137,9 @@ int main() {
   glfwGetFramebufferSize(window, &width, &height);
   glViewport(0, 0, width, height);
 
-  glUseProgram(shader_program);
-  glUniform1i(glGetUniformLocation(shader_program, "texture1"), 0);
-  glUniform1i(glGetUniformLocation(shader_program, "texture2"), 1);
+  shader.use_program();
+  shader.set_int("texture1", 0);
+  shader.set_int("texture2", 1);
 
   glm::vec3 cube_positions[] = {
       glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -225,21 +168,15 @@ int main() {
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
-    unsigned model_loc = glGetUniformLocation(shader_program, "model");
-    unsigned view_loc = glGetUniformLocation(shader_program, "view");
-    unsigned projection_loc = glGetUniformLocation(shader_program, "projection");
+    shader.set_mat4("view", view);
+    shader.set_mat4("projection", projection);
 
-    glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projection_loc, 1, GL_FALSE, glm::value_ptr(projection));
-
-    glBindTexture(GL_TEXTURE_2D, texture1);
     // draw our first triangle
-    glUseProgram(shader_program);
-    glUseProgram(shader_program);
+    shader.use_program();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1);
+    texture1.bind();
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture2);
+    texture2.bind();
 
     glBindVertexArray(VAO);
 
@@ -251,7 +188,8 @@ int main() {
         angle = glfwGetTime() * 25.0f;
       }
       model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-      glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
+
+      shader.set_mat4("model", model);
 
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }

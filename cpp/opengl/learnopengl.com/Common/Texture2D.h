@@ -9,7 +9,7 @@ public:
   ~Texture2D() noexcept override;
   std::string message() const override;
 
-  void bind();
+  void bind(int tex_index);
 private:
   std::string error_msg_;
 };

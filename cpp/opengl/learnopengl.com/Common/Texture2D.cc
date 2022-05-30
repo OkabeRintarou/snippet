@@ -49,6 +49,7 @@ std::string Texture2D::message() const {
   return error_msg_;
 }
 
-void Texture2D::bind() {
+void Texture2D::bind(int tex_index) {
+  glActiveTexture(GL_TEXTURE0 + tex_index);
   glBindTexture(GL_TEXTURE_2D, id_);
 }

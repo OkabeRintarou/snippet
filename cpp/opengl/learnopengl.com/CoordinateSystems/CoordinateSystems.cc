@@ -173,10 +173,8 @@ int main() {
 
     // draw our first triangle
     shader.use_program();
-    glActiveTexture(GL_TEXTURE0);
-    texture1.bind();
-    glActiveTexture(GL_TEXTURE1);
-    texture2.bind();
+    texture1.bind(0);
+    texture2.bind(1);
 
     glBindVertexArray(VAO);
 

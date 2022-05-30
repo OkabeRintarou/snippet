@@ -3,10 +3,14 @@
 #include <cassert>
 #include "Object.h"
 #include "Result.h"
-#include "ShaderManager.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+enum class shader_source {
+  from_string,
+  from_file,
+};
 
 class Shader : public Object {
 public:

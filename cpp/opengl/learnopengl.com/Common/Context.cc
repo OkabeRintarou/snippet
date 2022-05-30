@@ -32,14 +32,12 @@ std::optional<Context> Context::init(int width, int height, const char *title) {
 Context::Context(Context &&o) noexcept {
   if (this != &o) {
     this->window_ = o.window_;
-    this->sm_ = std::move(o.sm_);
   }
 }
 
 Context &Context::operator=(Context &&o) noexcept {
   if (this != &o) {
     this->window_ = o.window_;
-    this->sm_ = std::move(o.sm_);
   }
   return *this;
 }

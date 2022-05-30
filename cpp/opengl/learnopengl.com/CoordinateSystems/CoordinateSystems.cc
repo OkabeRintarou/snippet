@@ -3,9 +3,6 @@
 #include "Texture2D.h"
 #include <iostream>
 #include <stb_image.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action,
                   int mode);
@@ -154,33 +151,32 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    shader.use_program();
+    texture1.bind(0);
+    texture2.bind(1);
+    VAO.bind();
+
     glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    auto time = static_cast<float>(glfwGetTime());
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
     shader.set_mat4("view", view);
     shader.set_mat4("projection", projection);
 
-    // draw our first triangle
-    shader.use_program();
-    texture1.bind(0);
-    texture2.bind(1);
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model,100 * glm::radians(time), glm::vec3(0.0f, 1.0f, 0.0f));
+    shader.set_mat4("model", model);
 
-    VAO.bind();
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    for (unsigned i = 0; i < 10; i++) {
-      glm::mat4 model = glm::mat4(1.0f);
-      model = glm::translate(model, cube_positions[i]);
-      float angle = 20.0f * i;
-      if ((i % 3) == 0) {
-        angle = glfwGetTime() * 25.0f;
-      }
-      model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.5f));
+    model = glm::translate(model, glm::vec3(2 * sinf(2.0f * time), 0.0f, 2 * cosf(2.0f * time)));
+    model = glm::rotate(model, glm::radians(30.f), glm::vec3(0.0f, 1.0f, 0.0f));
+    shader.set_mat4("model", model);
 
-      shader.set_mat4("model", model);
-
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glfwSwapBuffers(window);
     glfwPollEvents();

@@ -61,6 +61,12 @@ public:
     glUniform2fv(loc, 1, glm::value_ptr(vec2));
   }
 
+  void set_vec3(const char *name, float v1, float v2, float v3) {
+    GLint loc = glGetUniformLocation(id_, name);
+    assert(loc != GL_INVALID_VALUE && loc != GL_INVALID_OPERATION);
+    glUniform3f(loc, v1, v2, v3);
+  }
+
   void set_mat4(const char *name, const glm::mat4 &mat4) {
     GLint loc = glGetUniformLocation(id_, name);
     assert(loc != GL_INVALID_VALUE && loc != GL_INVALID_OPERATION);

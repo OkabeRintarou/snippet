@@ -113,24 +113,14 @@ int main() {
       -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
   };
 
-  GLuint VBO, VAO;
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-
-  // bind the Vertex Array Object first, then bind and set vertex buffer(s), can
-  // then configure vertex attribute(s)
-  glBindVertexArray(VAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  // position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
-  glEnableVertexAttribArray(0);
-  // texture1 coord attribute
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
+  VertexArrayObjectBuilder<float> builder;
+  auto vao = builder.stride(5).add(3).add(2).data(vertices, sizeof(vertices)).build();
+  if (!vao) {
+    std::cerr << "Fail to build vertex array object: " << vao.err_value() << std::endl;
+    return -1;
+  }
+  VertexArrayObject &&VAO = vao.take_ok_value();
+  assert(VAO.is_valid());
 
   auto window = ctx->window();
   int width, height;
@@ -176,7 +166,7 @@ int main() {
     texture1.bind(0);
     texture2.bind(1);
 
-    glBindVertexArray(VAO);
+    VAO.bind();
 
     for (unsigned i = 0; i < 10; i++) {
       glm::mat4 model = glm::mat4(1.0f);
@@ -195,9 +185,6 @@ int main() {
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
-
-  glDeleteVertexArrays(1, &VAO);
-  glDeleteBuffers(1, &VBO);
 
   glfwTerminate();
 

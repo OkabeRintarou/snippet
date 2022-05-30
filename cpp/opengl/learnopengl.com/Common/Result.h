@@ -3,52 +3,52 @@
 #include <type_traits>
 #include <variant>
 
-template<typename T>
-class Ok {
-public:
-  explicit constexpr Ok(T value) : value(std::move(value)) {}
-  constexpr T&& take_value() { return std::move(value); }
-  T value;
-};
-
-template<typename T>
-class Err {
-public:
-  explicit constexpr Err(T value) : value(std::move(value)) {}
-  constexpr T&& take_value() { return std::move(value); }
-  T value;
-};
-
-template<typename T>
-constexpr Ok<std::decay_t<T>>
-make_ok(T&& v) {
-  return Ok<std::decay_t<T>>(std::forward<T>(v));
-}
-
-template<typename T>
-constexpr Err<std::decay_t<T>>
-make_err(T&& v) {
-  return Err<std::decay_t<T>>(std::forward<T>(v));
-}
-
 template<typename OkT, typename ErrT>
 class Result {
-public:
-  using VariantT = std::variant<Ok<OkT>, Err<ErrT>>;
+private:
+  using VariantT = std::variant<OkT, ErrT>;
+  template<typename T, typename U>
+  friend Result<T, U> make_ok(T);
+  template<typename T, typename U>
+  friend Result<T, U> make_err(U);
 
-  constexpr Result(Ok<OkT> value) : variant_(std::move(value)) {}
-  constexpr Result(Err<ErrT> value) : variant_(std::move(value)) {}
+  Result(const Result &) = delete;
+  void operator=(const Result&) = delete;
+public:
+  Result() = default;
+
+  Result(Result &&o) noexcept : variant_(std::move(o.variant_)) {}
+  Result& operator=(Result &&o) noexcept {
+    if (this != &o) {
+      variant_ = std::move(o.variant_);
+    }
+    return *this;
+  }
 
   constexpr operator bool() const { return is_ok(); }
-  constexpr bool is_ok() const { return std::holds_alternative<Ok<OkT>>(variant_); }
-  constexpr bool is_err() const { return std::holds_alternative<Err<ErrT>>(variant_); }
+  constexpr bool is_ok() const { return variant_.index() == 0; }
+  constexpr bool is_err() const { return variant_.index() == 1; }
 
-  constexpr OkT ok_value() const { return std::get<Ok<OkT>>(variant_).value; }
-  constexpr ErrT err_value() const { return std::get<Err<ErrT>>(variant_).value; }
-
-  constexpr OkT&& take_ok_value() { return std::get<Ok<OkT>>(variant_).take_value(); }
-  constexpr ErrT&& take_err_value() { return std::get<Err<ErrT>>(variant_).take_value(); }
+  constexpr const OkT &ok_value() const { return std::get<0>(variant_); }
+  constexpr const ErrT &err_value() const { return std::get<1>(variant_); }
+  constexpr OkT&& take_ok_value() { return std::get<0>(std::move(variant_)); }
+  constexpr ErrT&& take_err_value() { return std::get<1>(std::move(variant_)); }
 private:
   VariantT variant_;
 };
+
+template<typename OkT, typename ErrT>
+Result<OkT, ErrT> make_ok(OkT value) {
+  Result<OkT, ErrT> r;
+  r.variant_.template emplace<0>(std::move(value));
+  return r;
+}
+
+template<typename OkT, typename ErrT>
+Result<OkT, ErrT> make_err(ErrT value) {
+  Result<OkT, ErrT> r;
+  r.variant_.template emplace<1>(std::move(value));
+  return r;
+}
+
 

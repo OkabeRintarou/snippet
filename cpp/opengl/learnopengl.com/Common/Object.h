@@ -153,9 +153,6 @@ public:
 
     for (auto i = 0, e = configs_.size(); i < e; i++) {
       const auto &conf = configs_[i];
-      printf("glVertexAttribPointer(%d, %d, %d, %d, %d, %p), GL_FLOAT = %d\n",
-             i, conf.size, conf.type, conf.normalized, *stride_, conf.offset,
-             GL_FLOAT);
       glVertexAttribPointer((GLuint)i, conf.size, conf.type, conf.normalized,
                             *stride_, conf.offset);
       glEnableVertexAttribArray(i);

@@ -40,6 +40,8 @@ public:
     update_camera_vectors();
   }
 
+  float zoom() const noexcept { return zoom_; }
+
   glm::mat4 view_matrix() const {
     return glm::lookAt(position_, position_ + front_, up_);
   }
@@ -49,14 +51,45 @@ public:
     switch (direction) {
     case CameraMove::Forward:
       position_ += front_ * velocity;
+      break;
     case CameraMove::Backward:
       position_ -= front_ * velocity;
+      break;
     case CameraMove::Left:
       position_ -= right_ * velocity;
+      break;
     case CameraMove::Right:
       position_ += right_ * velocity;
+      break;
     default:
       assert(false && "never reach here");
+    }
+  }
+
+  void process_mouse_movement(float offset_x, float offset_y, bool constrain_pitch = true) {
+    offset_x *= mouse_sensitivity_;
+    offset_y *= mouse_sensitivity_;
+
+    yaw_ += offset_x;
+    pitch_ += offset_y;
+
+    if (constrain_pitch) {
+      if (pitch_ > 89.0f) {
+        pitch_ = 89.0f;
+      } else if (pitch_ < -89.0f) {
+        pitch_ = -89.0f;
+      }
+    }
+
+    update_camera_vectors();
+  }
+
+  void process_mouse_scroll(float offset_y) {
+    zoom_ -= offset_y;
+    if (zoom_ < 1.0f) {
+      zoom_ = 1.0f;
+    } else if (zoom_ > 45.f) {
+      zoom_ = 45.0f;
     }
   }
 private:

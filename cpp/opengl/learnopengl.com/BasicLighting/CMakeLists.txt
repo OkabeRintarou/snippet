@@ -1,0 +1,2 @@
+add_executable(BasicLighting BasicLighting.cc)
+target_link_libraries(BasicLighting Common)

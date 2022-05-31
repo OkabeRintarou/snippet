@@ -1,5 +1,6 @@
 #include <stb_image.h>
 
+#include "Camera.h"
 #include "Context.h"
 #include "Shader.h"
 #include "Texture2D.h"
@@ -15,16 +16,18 @@ void processInput(GLFWwindow *window);
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-glm::vec3 camera_pos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 camera_front = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+// camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float last_x = SCR_WIDTH / 2.0f, last_y = SCR_HEIGHT / 2.0f;
+bool first_mouse = true;
+
+// timing
 float delta_time = 0.0f; // time between current frame and last frame
 float last_frame = 0.0f; // time of last frame
-float last_x = 400.0f, last_y = 300.0f;
-float pitch = 0.0f, yaw = -90.0f;
-bool first_mouse = true;
-float fov = 45.0f;
-glm::vec3 light_pos(1.2f, 1.0f, 2.0f);
+
+// lighting
+glm::vec3 light_pos(2.0f, 1.0f, -2.0f);
 
 const char *vertexShaderSource =
     "#version 330 core\n"
@@ -62,81 +65,62 @@ int main() {
     return -1;
   }
 
-  //glfwSetInputMode(ctx->window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  // glfwSetInputMode(ctx->window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetCursorPosCallback(ctx->window(), mouse_callback);
   glfwSetScrollCallback(ctx->window(), scroll_callback);
 
   // compile and link shader
 
-  Shader shader(shader_source::from_string, vertexShaderSource, fragmentShaderSource);
+  Shader shader(shader_source::from_string, vertexShaderSource,
+                fragmentShaderSource);
   if (!shader.is_valid()) {
     std::cerr << "Fail to create shader: " << shader.message() << std::endl;
     return -1;
   }
 
-  Shader light_shader(shader_source::from_string, vertexShaderSource, lightFragmentShaderSource);
+  Shader light_shader(shader_source::from_string, vertexShaderSource,
+                      lightFragmentShaderSource);
   if (!light_shader.is_valid()) {
-    std::cerr << "Fail to create light shader: " << light_shader.message() << std::endl;
+    std::cerr << "Fail to create light shader: " << light_shader.message()
+              << std::endl;
     return -1;
   }
 
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
   float vertices[] = {
-      -0.5f, -0.5f, -0.5f,
-      0.5f, -0.5f, -0.5f,
-      0.5f,  0.5f, -0.5f,
-      0.5f,  0.5f, -0.5f,
-      -0.5f,  0.5f, -0.5f,
-      -0.5f, -0.5f, -0.5f,
+      -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f,
+      0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, -0.5f,
 
-      -0.5f, -0.5f,  0.5f,
-      0.5f, -0.5f,  0.5f,
-      0.5f,  0.5f,  0.5f,
-      0.5f,  0.5f,  0.5f,
-      -0.5f,  0.5f,  0.5f,
-      -0.5f, -0.5f,  0.5f,
+      -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,
+      0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,
 
-      -0.5f,  0.5f,  0.5f,
-      -0.5f,  0.5f, -0.5f,
-      -0.5f, -0.5f, -0.5f,
-      -0.5f, -0.5f, -0.5f,
-      -0.5f, -0.5f,  0.5f,
-      -0.5f,  0.5f,  0.5f,
+      -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, -0.5f,
+      -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,
 
-      0.5f,  0.5f,  0.5f,
-      0.5f,  0.5f, -0.5f,
-      0.5f, -0.5f, -0.5f,
-      0.5f, -0.5f, -0.5f,
-      0.5f, -0.5f,  0.5f,
-      0.5f,  0.5f,  0.5f,
+      0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f,
+      0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,
 
-      -0.5f, -0.5f, -0.5f,
-      0.5f, -0.5f, -0.5f,
-      0.5f, -0.5f,  0.5f,
-      0.5f, -0.5f,  0.5f,
-      -0.5f, -0.5f,  0.5f,
-      -0.5f, -0.5f, -0.5f,
+      -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,
+      0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f,
 
-      -0.5f,  0.5f, -0.5f,
-      0.5f,  0.5f, -0.5f,
-      0.5f,  0.5f,  0.5f,
-      0.5f,  0.5f,  0.5f,
-      -0.5f,  0.5f,  0.5f,
-      -0.5f,  0.5f, -0.5f,
+      -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,
+      0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f,
   };
 
   VertexArrayObjectBuilder<float> builder;
   auto vao = builder.stride(3).add(3).data(vertices, sizeof(vertices)).build();
   if (!vao) {
-    std::cerr << "Fail to create vertex array object: " << vao.err_value() << std::endl;
+    std::cerr << "Fail to create vertex array object: " << vao.err_value()
+              << std::endl;
     return -1;
   }
   auto &&VAO = vao.take_ok_value();
 
   auto light_vao = builder.build();
   if (!light_vao) {
-    std::cerr << "Fail to create light vao: " << light_vao.err_value() << std::endl;
+    std::cerr << "Fail to create light vao: " << light_vao.err_value()
+              << std::endl;
     return -1;
   }
 
@@ -164,9 +148,10 @@ int main() {
     shader.set_vec3("object_color", 1.0f, 0.5f, 0.31f);
     shader.set_vec3("light_color", 1.0f, 1.0f, 1.0f);
 
-    glm::mat4 projection = glm::perspective(fov, (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    glm::mat4 view =
-        glm::lookAt(camera_pos, camera_pos + camera_front, camera_up);
+    glm::mat4 projection =
+        glm::perspective(glm::radians(camera.zoom()),
+                         (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    glm::mat4 view = camera.view_matrix();
     glm::mat4 model(1.0f);
 
     shader.set_mat4("model", model);
@@ -181,6 +166,8 @@ int main() {
     model = glm::mat4(1.0f);
     model = glm::translate(model, light_pos);
     model = glm::scale(model, glm::vec3(0.2f));
+
+
     light_shader.set_mat4("view", view);
     light_shader.set_mat4("projection", projection);
     light_shader.set_mat4("model", model);
@@ -207,17 +194,20 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action,
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {}
 
 void processInput(GLFWwindow *window) {
+
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, true);
+  }
+
   const float camera_speed = 2.5f * delta_time;
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    camera_pos += camera_speed * camera_front;
+    camera.process_keyboard(CameraMove::Forward, delta_time);
   } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    camera_pos -= camera_speed * camera_front;
+    camera.process_keyboard(CameraMove::Backward, delta_time);
   } else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-    camera_pos -=
-        glm::normalize(glm::cross(camera_front, camera_up)) * camera_speed;
+    camera.process_keyboard(CameraMove::Left, delta_time);
   } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-    camera_pos +=
-        glm::normalize(glm::cross(camera_front, camera_up)) * camera_speed;
+    camera.process_keyboard(CameraMove::Right, delta_time);
   }
 }
 
@@ -232,31 +222,10 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
   last_x = xpos;
   last_y = ypos;
 
-  const float sensitivity = 0.1f;
-  xoffset *= sensitivity;
-  yoffset *= sensitivity;
+  camera.process_mouse_movement(xoffset, yoffset);
 
-  yaw += xoffset;
-  pitch += yoffset;
-
-  if (pitch > 89.f) {
-    pitch = 89.0f;
-  } else if (pitch < -89.0f) {
-    pitch = -89.0f;
-  }
-
-  glm::vec3 direction;
-  direction.x = cosf(glm::radians(yaw)) * cosf(glm::radians(pitch));
-  direction.y = sinf(glm::radians(pitch));
-  direction.z = sinf(glm::radians(yaw)) * cosf(glm::radians(pitch));
-  camera_front = glm::normalize(direction);
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
-  fov -= (float)yoffset;
-  if (fov < 1.0f) {
-    fov = 1.0f;
-  } else if (fov > 65.0f) {
-    fov = 65.0f;
-  }
+  camera.process_mouse_scroll(static_cast<float>(yoffset));
 }

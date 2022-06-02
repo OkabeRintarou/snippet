@@ -11,14 +11,15 @@
 #include "test_container_of.h"
 #include "test_wait_queue.h"
 #include "test_timer.h"
+#include "test_tasklet.h"
 
 static int kernel_api_demo_init(void) {
-  test_timer_init();
+  test_tasklet_init();
   return 0;
 }
 
 static void kernel_api_demo_exit(void) {
-  test_timer_fini();
+  test_tasklet_fini();
 }
 
 module_init(kernel_api_demo_init);

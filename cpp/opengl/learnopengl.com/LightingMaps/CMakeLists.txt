@@ -1,0 +1,2 @@
+add_executable(LightingMaps LightingMaps.cc)
+target_link_libraries(LightingMaps Common)

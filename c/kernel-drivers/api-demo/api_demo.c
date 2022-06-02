@@ -12,14 +12,15 @@
 #include "test_wait_queue.h"
 #include "test_timer.h"
 #include "test_tasklet.h"
+#include "test_work_queue.h"
 
 static int kernel_api_demo_init(void) {
-  test_tasklet_init();
+  test_work_queue_init();
   return 0;
 }
 
 static void kernel_api_demo_exit(void) {
-  test_tasklet_fini();
+  test_work_queue_fini();
 }
 
 module_init(kernel_api_demo_init);

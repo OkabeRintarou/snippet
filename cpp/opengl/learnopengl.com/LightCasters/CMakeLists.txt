@@ -1,0 +1,2 @@
+add_executable(LightCasters LightCasters.cc)
+target_link_libraries(LightCasters Common)

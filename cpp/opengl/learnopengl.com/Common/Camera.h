@@ -42,6 +42,7 @@ public:
 
   float zoom() const noexcept { return zoom_; }
   const glm::vec3 & position() const noexcept { return position_; }
+  const glm::vec3 &front() const noexcept { return front_; }
 
   glm::mat4 view_matrix() const {
     return glm::lookAt(position_, position_ + front_, up_);

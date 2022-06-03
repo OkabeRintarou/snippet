@@ -192,9 +192,11 @@ int main() {
     shader.set_vec3("light.ambient", 0.2f, 0.2f, 0.2f);
     shader.set_vec3("light.diffuse", 0.5f, 0.5f, 0.5f);
     shader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
-    shader.set_vec3("light.direction", -0.2f, -0.1f, -0.3f);
+    shader.set_vec3("light.position", camera.position());
+    shader.set_vec3("light.direction", camera.front());
+    shader.set_float("light.cut_off", glm::cos(glm::radians(12.5f)));
+    shader.set_float("light.out_cut_off", glm::cos(glm::radians(17.5f)));
 
-    shader.set_vec3("light.position", light_pos);
     shader.set_vec3("view_pos", camera.position());
 
     glm::mat4 projection =

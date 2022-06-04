@@ -159,17 +159,13 @@ Model::load_material_textures(aiMaterial *mat, aiTextureType type,
       texture.type = type_name;
       texture.path = str.C_Str();
       ret.push_back(texture);
-      texture_loaded_.push_back(texture);
+
+      texture_loaded_.emplace(str.C_Str());
     }
   }
   return ret;
 }
 
 bool Model::is_texture_loaded(const char *name) const {
-  for (const auto &tex : texture_loaded_) {
-    if (std::strcmp(tex.path.data(), name) == 0) {
-      return true;
-    }
-  }
-  return false;
+  return texture_loaded_.find(name) != texture_loaded_.end();
 }

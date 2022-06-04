@@ -1,6 +1,3 @@
-
-
-
 #include <stb_image.h>
 
 #include "Camera.h"

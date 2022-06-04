@@ -8,6 +8,7 @@
 #include <assimp/scene.h>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 class Model : public Object {
 public:
@@ -26,7 +27,7 @@ private:
                                               const std::string &type_name);
   bool is_texture_loaded(const char *name) const;
 private:
-  std::vector<Texture> texture_loaded_;
+  std::unordered_set<std::string> texture_loaded_;
   std::vector<Mesh> meshes_;
   std::string directory_;
   std::string error_msg_;

@@ -2,6 +2,7 @@
 #include "Context.h"
 #include "Shader.h"
 #include "Model.h"
+#include "Timer.h"
 #include <iostream>
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action,
@@ -50,7 +51,11 @@ int main() {
     std::cerr << "Fail to load shader: " << shader.message() << std::endl;
     return -1;
   }
+  Timer timer;
+  timer.reset();
   Model our_model("../../Resources/Objects/backpack/backpack.obj");
+  std::cout << "load model cost: " << timer.elapsed_milliseconds() << " ms" << std::endl;
+
   if (!our_model.is_valid()) {
     std::cerr << "Fail to load model: " << our_model.message() << std::endl;
     return -1;

@@ -22,15 +22,13 @@ Texture2D::Texture2D(const char *const filename) {
     return;
   }
   GLenum format = GL_RGB;
-  const char *file_suffix;
-  const auto len = strlen(filename);
-  if (len > 3) {
-    file_suffix = &filename[len - 3];
-    if (strncasecmp(file_suffix, "png", 3) == 0) {
-      format = GL_RGBA;
-    }
+  if (channels == 1) {
+    format = GL_RED;
+  } else if (channels == 4) {
+    format = GL_RGBA;
   }
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format,
+
+  glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
                GL_UNSIGNED_BYTE, img_data);
   glGenerateMipmap(GL_TEXTURE_2D);
   stbi_image_free(img_data);

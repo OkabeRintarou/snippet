@@ -1,0 +1,2 @@
+add_executable(StencilTest StencilTest.cc)
+target_link_libraries(StencilTest Common)

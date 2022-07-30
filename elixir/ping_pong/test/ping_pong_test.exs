@@ -74,6 +74,38 @@ defmodule PingPongTest do
     end
   end
 
+  test "producer can catch up nodes after a netsplit", %{nodes: nodes} do
+    [n1, n2] = nodes
+
+    assert :ok = GenServer.call({Producer, n2}, :send_ping)
+    assert :ok = GenServer.call({Producer, n1}, :send_ping)
+
+    eventually(fn ->
+      assert Consumer.total_pings({Consumer, n1}) == 2
+      assert Consumer.total_pings({Consumer, n2}) == 2
+    end)
+
+    # Split n1 away n2
+    Schism.partition([n1])
+
+    # Sending pings from n2 should not reach n1 and vice versa
+    assert :ok = GenServer.call({Producer, n2}, :send_ping)
+    assert :ok = GenServer.call({Producer, n1}, :send_ping)
+
+
+    eventually(fn ->
+      assert Consumer.total_pings({Consumer, n1}) == 3
+      assert Consumer.total_pings({Consumer, n2}) == 3
+    end)
+
+    Schism.heal([n1, n2])
+
+    eventually(fn ->
+      assert Consumer.total_pings({Consumer, n1}) == 4
+      assert Consumer.total_pings({Consumer, n2}) == 4
+    end)
+  end
+
   def eventually(f, retries \\ 0) do
     f.()
   rescue

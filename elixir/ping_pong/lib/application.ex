@@ -4,7 +4,10 @@ defmodule PingPong.Application do
   use Application
 
   def start(_type, _args) do
-    children = []
+    children = [
+      PingPong.Consumer,
+      PingPong.Producer,
+    ]
     opts = [
       strategy: :one_for_one
     ]

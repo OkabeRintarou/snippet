@@ -1,0 +1,4 @@
+%{
+  "poolboy": {:hex, :poolboy, "1.5.2", "392b007a1693a64540cead79830443abf5762f5d30cf50bc95cb2c1aaafa006b", [:rebar3], [], "hexpm", "dad79704ce5440f3d5a3681c8590b9dc25d1a561e8f5a9c995281012860901e3"},
+  "riak_core": {:hex, :riak_core_lite, "0.10.4", "9259efbfe149d8f297230857768bc01cfa2d2090889d85a2b893191680489550", [:rebar3], [{:poolboy, "~>1.5.2", [hex: :poolboy, repo: "hexpm", optional: false]}], "hexpm", "ace10859d8fc2af6cfc25ff4343488a5ef64abaabbb2eaae63db7575dcbdf21e"},
+}

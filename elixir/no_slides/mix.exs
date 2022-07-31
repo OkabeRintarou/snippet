@@ -13,7 +13,7 @@ defmodule NoSlides.MixProject do
 
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :riak_core],
       mod: {NoSlides.Application, []}
     ]
   end

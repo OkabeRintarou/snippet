@@ -1,16 +1,15 @@
 defmodule NoSlides.Application do
-  @moduledoc false
-
   use Application
+  require Logger
 
-  @impl true
   def start(_type, _args) do
-    children = [
-      # Starts a worker by calling: NoSlides.Worker.start_link(arg)
-      # {NoSlides.Worker, arg}
-    ]
-
-    opts = [strategy: :one_for_one, name: NoSlides.Supervisor]
-    Supervisor.start_link(children, opts)
+    case NoSlides.Supervisor.start_link() do
+      {:ok, pid} ->
+        :ok = :riak_core.register(vnode_module: NoSlides.VNode)
+        :ok = :riak_core_node_watcher.service_up(NoSlides.Service, self())
+        {:ok, pid}
+      {:error, reason} ->
+        Logger.error("Unable to start NoSlides supervisor because: #{inspect reason}")
+    end
   end
 end

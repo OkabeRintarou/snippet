@@ -1,2 +1,0 @@
-defmodule NoSlides do
-end

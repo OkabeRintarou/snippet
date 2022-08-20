@@ -1,3 +1,4 @@
+`timescale 1 ns/ 10 ps
 `include "./inst_fetch.v"
 
 module inst_fetch_tb;
@@ -7,6 +8,11 @@ module inst_fetch_tb;
 	logic rst;
 	logic [31:0] inst;
 
+	initial
+	begin
+		$dumpfile("wave.vcd");
+		$dumpvars(0, inst_fetch_tb);
+	end
 	/* 第二阶段: 激励向量定义 */
 	initial begin
 		CLOCK_50 = 1'b0;

@@ -1,3 +1,7 @@
 add_executable(simpleDivergence simpleDivergence.cu)
 target_link_libraries(simpleDivergence common)
 add_executable(nestedHelloWorld nestedHelloWorld.cu)
+add_executable(sumMatrix sumMatrix.cu)
+target_link_libraries(sumMatrix common)
+add_executable(reduce reduce.cu)
+target_link_libraries(reduce common)

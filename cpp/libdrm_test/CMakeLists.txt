@@ -23,7 +23,10 @@ if (GTEST_FOUND)
 endif()
 
 set(SRC_FILES
-    main.cpp)
+        amdgpu_test.cpp
+        amdgpu_device.cpp
+        amdgpu_bo.cpp
+        )
 
-add_executable(libdrm_test ${SRC_FILES})
-target_link_libraries(libdrm_test ${GTEST_LIBRARIES} ${DRM_LDFLAGS} ${DRM_AMDGPU_LDFLAGS} pthread)
+add_executable(vm_tests ${SRC_FILES} vm_tests.cpp)
+target_link_libraries(vm_tests gtest drm drm_amdgpu)

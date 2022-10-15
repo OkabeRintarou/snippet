@@ -1,6 +1,8 @@
 #include "amdgpu_test.h"
 #include "vm_tests.h"
 
+using namespace amdgpu;
+
 void VMTest::SetUp() {
     EXPECT_TRUE(dev_.is_valid());
 }
@@ -15,12 +17,16 @@ TEST_F(VMTest, ReserveVMIDTest) {
                                                    gpu_info.chip_rev) ?
                               AMDGPU_HW_IP_COMPUTE : AMDGPU_HW_IP_GFX;
 
-    const auto &bo = dev_.alloc_bo(4096, 4096, AMDGPU_GEM_DOMAIN_GTT, 0);
-    EXPECT_TRUE(bo.is_valid());
+    amdgpu_bo_alloc_request req {};
+    req.alloc_size = 4096;
+    req.phys_alignment = 4096;
+    req.preferred_heap = AMDGPU_GEM_DOMAIN_GTT;
 
-    amdgpu_context_handle context_handle = nullptr;
-    r = amdgpu_cs_ctx_create(dev_.handle(), &context_handle);
-    EXPECT_EQ(r, 0);
+    BufferObject bo;
+    Context ctx;
+
+    EXPECT_TRUE(dev_.alloc(req, bo) && bo.is_valid());
+    EXPECT_TRUE(dev_.alloc(ctx) && ctx.is_valid());
 
     uint32_t flags = 0;
     r = amdgpu_vm_reserve_vmid(dev_.handle(), flags);
@@ -48,11 +54,11 @@ TEST_F(VMTest, ReserveVMIDTest) {
     ibs_request.resources = bo_list;
     ibs_request.fence_info.handle = nullptr;
 
-    r = amdgpu_cs_submit(context_handle, 0, &ibs_request, 1);
+    r = amdgpu_cs_submit(ctx.handle(), 0, &ibs_request, 1);
     EXPECT_EQ(r, 0);
 
     amdgpu_cs_fence fence{};
-    fence.context = context_handle;
+    fence.context = ctx.handle();
     fence.ip_type = gc_ip_type;
     fence.ip_instance = 0;
     fence.ring = 0;
@@ -67,9 +73,6 @@ TEST_F(VMTest, ReserveVMIDTest) {
 
     flags = 0;
     r = amdgpu_vm_unreserve_vmid(dev_.handle(), flags);
-    EXPECT_EQ(r, 0);
-
-    r = amdgpu_cs_ctx_free(context_handle);
     EXPECT_EQ(r, 0);
 }
 

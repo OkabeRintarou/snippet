@@ -25,8 +25,9 @@ endif()
 set(SRC_FILES
         amdgpu_test.cpp
         amdgpu_device.cpp
-        amdgpu_bo.cpp
         )
 
 add_executable(vm_tests ${SRC_FILES} vm_tests.cpp)
 target_link_libraries(vm_tests gtest drm drm_amdgpu)
+add_executable(basic_tests ${SRC_FILES} basic_tests.cpp)
+target_link_libraries(basic_tests gtest drm drm_amdgpu)

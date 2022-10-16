@@ -75,6 +75,8 @@ public:
     amdgpu_device_handle handle() const { return dev_; }
 
     bool alloc(const amdgpu_bo_alloc_request &req, BufferObject &bo);
+    bool alloc(BufferObject &bo);
+
     bool alloc(Context &ctx);
 private:
     int fd_ = -1;

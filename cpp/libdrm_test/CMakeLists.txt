@@ -25,6 +25,7 @@ endif()
 set(SRC_FILES
         amdgpu_test.cpp
         amdgpu_device.cpp
+        pm4.cpp
         )
 
 add_executable(vm_tests ${SRC_FILES} vm_tests.cpp)

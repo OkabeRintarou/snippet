@@ -25,7 +25,7 @@ TEST_F(VMTest, ReserveVMIDTest) {
     BufferObject bo;
     Context ctx;
 
-    EXPECT_TRUE(dev_.alloc(req, bo) && bo.is_valid());
+    EXPECT_TRUE(dev_.alloc(req, bo, true) && bo.is_valid());
     EXPECT_TRUE(dev_.alloc(ctx) && ctx.is_valid());
 
     uint32_t flags = 0;

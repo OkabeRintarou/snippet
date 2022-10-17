@@ -42,7 +42,7 @@ void BasicTest::command_submission_write_linear_helper_with_secure(unsigned int 
             req.preferred_heap = AMDGPU_GEM_DOMAIN_GTT;
             req.flags = gtt_flags[loop];
 
-            ASSERT_TRUE(dev_.alloc(req, bo));
+            ASSERT_TRUE(dev_.alloc(req, bo, true));
 
             memset((void*)bo.cpu_address(), 0, sdma_write_length * sizeof(uint32_t));
 
@@ -98,7 +98,7 @@ void BasicTest::exec_cs_helper_raw(Context &ctx,
     req.preferred_heap = AMDGPU_GEM_DOMAIN_GTT;
 
     BufferObject bo;
-    ASSERT_TRUE(dev_.alloc(req, bo) && bo.is_valid());
+    ASSERT_TRUE(dev_.alloc(req, bo, true) && bo.is_valid());
 
     // copy PM4 packet to ring from caller
     auto ring_ptr = bo.cpu_address();

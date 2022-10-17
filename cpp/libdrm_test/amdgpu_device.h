@@ -33,15 +33,20 @@ public:
     uint64_t gpu_address() const { return mc_address_; }
     void *cpu_address() const { return cpu_address_; }
     amdgpu_bo_handle handle() const { return bo_handle_; }
+    bool is_mapped() const { return cpu_address_ != nullptr; }
+    void *mmap(uint64_t mapping_flag = 0);
+    void unmap();
 
     bool is_valid() const { return PosixErrorCode::is_valid(); }
     const char *message() const { return PosixErrorCode::message(); }
 private:
     uint64_t size_ = 0;
+    uint64_t align_ = 0;
     uint64_t mc_address_ = 0;
     void *cpu_address_ = nullptr;
     amdgpu_bo_handle bo_handle_ = nullptr;
     amdgpu_va_handle va_handle_ = nullptr;
+    amdgpu_device_handle dev_handle_ = nullptr;
 };
 
 class Context : private PosixErrorCode {
@@ -74,8 +79,7 @@ public:
     bool is_valid() const { return fd_ != -1 && dev_ != nullptr; }
     amdgpu_device_handle handle() const { return dev_; }
 
-    bool alloc(const amdgpu_bo_alloc_request &req, BufferObject &bo);
-    bool alloc(BufferObject &bo);
+    bool alloc(const amdgpu_bo_alloc_request &req, BufferObject &bo, bool mmap = false);
 
     bool alloc(Context &ctx);
 private:

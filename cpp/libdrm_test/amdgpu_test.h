@@ -27,6 +27,13 @@ inline int amdgpu_bo_unmap_and_free(amdgpu_bo_handle bo, amdgpu_va_handle va_han
     return 0;
 }
 
+int amdgpu_bo_alloc_wrap(amdgpu_device_handle dev, uint64_t size,
+                         uint64_t alignment, unsigned heap, uint64_t alloc_flags,
+                         amdgpu_bo_handle *bo);
+int amdgpu_bo_map(amdgpu_device_handle dev, amdgpu_bo_handle bo_handle,
+                  uint64_t size, uint64_t alignment,
+                  uint64_t mapping_flags, void **cpu, uint64_t *mc_address, amdgpu_va_handle *va_handle);
+
 inline int amdgpu_get_bo_list(amdgpu_device_handle dev,
                               amdgpu_bo_handle bo1, amdgpu_bo_handle bo2,
                               amdgpu_bo_list_handle *list) {

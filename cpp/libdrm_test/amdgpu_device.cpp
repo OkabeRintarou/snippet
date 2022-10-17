@@ -24,30 +24,48 @@ Device::~Device() {
         close(fd_);
 }
 
-bool Device::alloc(const amdgpu_bo_alloc_request &req, BufferObject &bo) {
-    uint64_t mc_addr;
-    void *cpu;
-    amdgpu_bo_handle bo_handle;
-    amdgpu_va_handle va_handle;
-
-    int r = amdgpu_bo_alloc_and_map(dev_,
-                                    req.alloc_size,
-                                    req.phys_alignment,
-                                    req.preferred_heap,
-                                    req.flags,
-                                    &bo_handle,
-                                    &cpu,
-                                    &mc_addr,
-                                    &va_handle);
-    bo.code = r;
-    if (r != 0) {
-        return false;
-    }
+bool Device::alloc(const amdgpu_bo_alloc_request &req, BufferObject &bo, bool mmap) {
     bo.size_ = req.alloc_size;
-    bo.mc_address_ = mc_addr;
-    bo.cpu_address_ = cpu;
-    bo.bo_handle_ = bo_handle;
-    bo.va_handle_ = va_handle;
+    bo.align_ = req.phys_alignment;
+    bo.dev_handle_ = dev_;
+
+    if (mmap) {
+        uint64_t mc_addr;
+        void *cpu;
+        amdgpu_bo_handle bo_handle;
+        amdgpu_va_handle va_handle;
+
+        int r = amdgpu_bo_alloc_and_map(dev_,
+                                        req.alloc_size,
+                                        req.phys_alignment,
+                                        req.preferred_heap,
+                                        req.flags,
+                                        &bo_handle,
+                                        &cpu,
+                                        &mc_addr,
+                                        &va_handle);
+        bo.code = r;
+        if (r != 0)
+            return false;
+        bo.mc_address_ = mc_addr;
+        bo.cpu_address_ = cpu;
+        bo.bo_handle_ = bo_handle;
+        bo.va_handle_ = va_handle;
+    } else {
+       bo.mc_address_ = 0;
+       bo.cpu_address_ = nullptr;
+       bo.bo_handle_ = nullptr;
+       bo.va_handle_ = nullptr;
+
+       amdgpu_bo_alloc_request alloc_req = req;
+       amdgpu_bo_handle buf_handle{};
+       int r = amdgpu_bo_alloc(dev_, &alloc_req, &buf_handle);
+       bo.code = r;
+       if (r != 0)
+           return false;
+
+       bo.bo_handle_ = buf_handle;
+    }
 
     return true;
 }
@@ -76,8 +94,34 @@ Context::~Context() {
 
 BufferObject::~BufferObject() {
     if (bo_handle_ != nullptr) {
-        amdgpu_bo_unmap_and_free(bo_handle_, va_handle_, mc_address_, size_);
+        if (cpu_address_ != nullptr)
+            amdgpu_bo_unmap_and_free(bo_handle_, va_handle_, mc_address_, size_);
+        else
+            amdgpu_bo_free(bo_handle_);
     }
+}
+
+void *BufferObject::mmap(uint64_t mapping_flag) {
+    if (cpu_address_ != nullptr) {
+        return cpu_address_;
+    }
+
+    int r = amdgpu_bo_map(dev_handle_, bo_handle_, size_, align_, mapping_flag,
+                  &cpu_address_, &mc_address_, &va_handle_);
+    if (r)
+        return nullptr;
+    return cpu_address_;
+}
+
+void BufferObject::unmap() {
+    if (cpu_address_ != nullptr) {
+        amdgpu_bo_cpu_unmap(bo_handle_);
+        amdgpu_bo_va_op(handle(), 0, size_, mc_address_, 0, AMDGPU_VA_OP_UNMAP);
+        amdgpu_va_range_free(va_handle_);
+    }
+    cpu_address_ = nullptr;
+    mc_address_ = 0;
+    va_handle_ = nullptr;
 }
 
 }

@@ -1,8 +1,9 @@
+#include "basic_tests.h"
+#include "pm4_packet.h"
+#include "sdma_packet.h"
 #include <amdgpu.h>
 #include <amdgpu_drm.h>
 #include <vector>
-#include "basic_tests.h"
-#include "pm4.h"
 
 using namespace amdgpu;
 using namespace std;
@@ -161,6 +162,73 @@ TEST_F(BasicTest, GFXDispatchTest) {
 
     for (ring_id = 0; (1 << ring_id) & info.available_rings; ring_id++) {
 
+    }
+}
+
+TEST_F(BasicTest, EvictionTest) {
+    const int sdma_write_length = 1024;
+    int r;
+    int loop1, loop2;
+    uint16_t gtt_flags[2] = {0, AMDGPU_GEM_CREATE_CPU_GTT_USWC};
+    amdgpu_heap_info vram_info{}, gtt_info{};
+
+    Context ctx;
+    ASSERT_TRUE(dev_.alloc(ctx));
+
+    r = amdgpu_query_heap_info(dev_.handle(), AMDGPU_GEM_DOMAIN_VRAM, 0, &vram_info);
+    ASSERT_EQ(r, 0);
+
+    BufferObject vram_max[2], gtt_max[2];
+
+    amdgpu_bo_alloc_request req{};
+    req.alloc_size = vram_info.max_allocation;
+    req.phys_alignment = 4096;
+    req.preferred_heap = AMDGPU_GEM_DOMAIN_VRAM;
+
+    ASSERT_TRUE(dev_.alloc(req, vram_max[0], false) && vram_max[0].is_valid());
+    ASSERT_TRUE(dev_.alloc(req, vram_max[1], false) && vram_max[1].is_valid());
+
+    r = amdgpu_query_heap_info(dev_.handle(), AMDGPU_GEM_DOMAIN_GTT, 0, &gtt_info);
+    ASSERT_EQ(r, 0);
+
+    req.alloc_size = gtt_info.max_allocation;
+    req.phys_alignment = 4096;
+    req.preferred_heap = AMDGPU_GEM_DOMAIN_GTT;
+
+    ASSERT_TRUE(dev_.alloc(req, gtt_max[0], false));
+    ASSERT_TRUE(dev_.alloc(req, gtt_max[1], false));
+
+    vector<amdgpu_bo_handle> resources;
+    resources.reserve(8);
+
+    loop1 = loop2 = 0;
+    while (loop1 < 2) {
+        while (loop2 < 2) {
+
+            resources.clear();
+
+            BufferObject bo1, bo2;
+
+            // allocate UC bo1 for sDMA use
+            req.alloc_size = sdma_write_length;
+            req.phys_alignment = 4096;
+            req.preferred_heap = AMDGPU_GEM_DOMAIN_GTT;
+            req.flags = gtt_flags[loop1];
+            ASSERT_TRUE(dev_.alloc(req, bo1, true) && bo1.is_valid());
+            memset(bo1.cpu_address(), 0xaa, sdma_write_length);
+            // allocate UC bo2 for sDMA use
+            req.flags = gtt_flags[loop2];
+            ASSERT_TRUE(dev_.alloc(req, bo2, true) && bo2.is_valid());
+            memset(bo2.cpu_address(), 0, sdma_write_length);
+
+            resources.insert(resources.end(),
+                             {bo1.handle(), bo2.handle(), vram_max[loop2].handle(), gtt_max[loop2].handle()});
+
+
+            ++loop2;
+        }
+        ++loop1;
+        loop2 = 0;
     }
 }
 

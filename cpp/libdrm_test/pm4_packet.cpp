@@ -1,24 +1,6 @@
-#include "pm4.h"
+#include <cstddef>
 #include <cstring>
-#include <iomanip>
-#include <iostream>
-
-
-void BasePacket::dump() const {
-    unsigned size = size_in_dwords();
-    unsigned i;
-    const auto packet = static_cast<const uint32_t *>(get_packet());
-
-    std::cout << "Packet Dump:" << std::hex;
-    for (i = 0; i < size; i++)
-        std::cout << " " << std::setw(8) << std::setfill('0') << packet[i];
-    std::cout << std::endl;
-}
-
-void *BasePacket::alloc_data() {
-    data.resize(size_in_bytes());
-    return data.data();
-}
+#include "pm4_packet.h"
 
 unsigned PM4Packet::calc_count_value() const {
     return size_in_dwords() - sizeof(PM4_TYPE_3_HEADER) / sizeof(uint32_t) - 1;
@@ -39,11 +21,12 @@ PM4WriteDataPacket::PM4WriteDataPacket(const PM4WriteDataPacket::Config &conf, u
 }
 
 unsigned PM4WriteDataPacket::size_in_bytes() const {
-    return offsetof(PM4_WRITE_DATA_CI, data) + ndw * sizeof(uint32_t);
+    return bytes;
 }
 
 void PM4WriteDataPacket::init_packet(const PM4WriteDataPacket::Config &conf, uint64_t dst_addr, const uint32_t *data) {
-    packet = reinterpret_cast<PM4_WRITE_DATA_CI*>(alloc_data());
+    bytes = offsetof(PM4_WRITE_DATA_CI, data) + ndw * sizeof(uint32_t);
+    packet = reinterpret_cast<PM4_WRITE_DATA_CI*>(alloc_data(bytes));
 
     init_header(packet->header, OpCode::WRITE_DATA);
     packet->dst_sel = static_cast<const unsigned>(conf.dst_sel);

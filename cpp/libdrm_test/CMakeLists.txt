@@ -25,7 +25,9 @@ endif()
 set(SRC_FILES
         amdgpu_test.cpp
         amdgpu_device.cpp
-        pm4.cpp
+        pm4_packet.cpp
+        sdma_packet.cpp
+        packet_common.cpp
         )
 
 add_executable(vm_tests ${SRC_FILES} vm_tests.cpp)

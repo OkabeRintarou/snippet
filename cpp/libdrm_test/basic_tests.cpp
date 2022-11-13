@@ -309,7 +309,7 @@ TEST_F(BasicTest, EvictionTest) {
 
             SDMACopyDataPacket copy_packet(
                 reinterpret_cast<void *>(bo2.gpu_address()),
-                reinterpret_cast<void *>(bo1.cpu_address()),
+                reinterpret_cast<void *>(bo1.gpu_address()),
                 static_cast<unsigned>(sdma_write_length));
 
 

@@ -22,9 +22,11 @@ public:
 
 class SDMACopyDataPacket : public SDMAPacket {
 public:
-    SDMACopyDataPacket(unsigned family_id, void *dst, void *src, unsigned size);
-    SDMACopyDataPacket(unsigned family_id, void ** const dsts, void *src, int n, unsigned size);
+    SDMACopyDataPacket(const void *dst, const void *src, unsigned size);
+    SDMACopyDataPacket(const void ** const dsts, const void *src, int n, unsigned size);
+    unsigned size_in_bytes() const override { return bytes; }
+    const void *get_packet() const override { return packet; }
 private:
     SDMA_PKT_COPY_LINEAR *packet;
-    unsigned size;
+    unsigned bytes;
 };

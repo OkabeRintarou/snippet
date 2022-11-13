@@ -23,6 +23,7 @@ if (GTEST_FOUND)
 endif()
 
 set(SRC_FILES
+        amdgpu_util.cpp
         amdgpu_test.cpp
         amdgpu_device.cpp
         pm4_packet.cpp

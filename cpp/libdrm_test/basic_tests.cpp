@@ -4,6 +4,7 @@
 #include <amdgpu.h>
 #include <amdgpu_drm.h>
 #include <vector>
+#include <memory>
 
 using namespace amdgpu;
 using namespace std;
@@ -73,6 +74,84 @@ void BasicTest::command_submission_write_linear_helper_with_secure(unsigned int 
             }
 
             ++loop;
+        }
+    }
+}
+
+void BasicTest::command_submission_copy_linear_helper(unsigned int ip_type) {
+    const int sdma_write_length = 1024;
+    drm_amdgpu_info_hw_ip hw_ip_info{};
+    int r, loop1, loop2;
+    uint64_t gtt_flags[2] = {0, AMDGPU_GEM_CREATE_CPU_GTT_USWC};
+    vector<amdgpu_bo_handle> resources;
+
+    r = amdgpu_query_hw_ip_info(dev_.handle(), ip_type, 0, &hw_ip_info);
+    ASSERT_EQ(r, 0);
+
+    Context ctx;
+    ASSERT_TRUE(dev_.alloc(ctx));
+
+    resources.reserve(8);
+
+    for (int ring_id = 0; (1 << ring_id) & hw_ip_info.available_rings; ring_id++) {
+        loop1 = loop2 = 0;
+        // run 9 circles to test all mapping combination
+        while (loop1 < 2) {
+            while (loop2 < 2) {
+
+                resources.clear();
+                amdgpu_bo_alloc_request req{};
+                // allocate UC bo1 for sDMA use
+                BufferObject bo1;
+
+                memset(&req, 0, sizeof(req));
+                req.alloc_size = sdma_write_length;
+                req.phys_alignment = 4096;
+                req.flags = gtt_flags[loop1];
+                req.preferred_heap = AMDGPU_GEM_DOMAIN_GTT;
+                ASSERT_TRUE(dev_.alloc(req, bo1, true) && bo1.is_valid());
+
+                memset(bo1.cpu_address(), 0xaa, sdma_write_length);
+
+                // allocate UC bo2 for sDMA use
+                BufferObject bo2;
+
+                memset(&req, 0, sizeof(req));
+                req.alloc_size = sdma_write_length;
+                req.phys_alignment = 4096;
+                req.flags = gtt_flags[loop2];
+                req.preferred_heap = AMDGPU_GEM_DOMAIN_GTT;
+                ASSERT_TRUE(dev_.alloc(req, bo2, true) && bo2.is_valid());
+
+                memset(bo2.cpu_address(), 0x0, sdma_write_length);
+
+                resources.insert(resources.end(), {bo1.handle(), bo2.handle()});
+
+                if (ip_type == AMDGPU_HW_IP_DMA) {
+                    // fulfill PM4: test copy DMA copy linear
+                    SDMACopyDataPacket copy_packet(
+                        reinterpret_cast<const void *>(bo2.gpu_address()),
+                        reinterpret_cast<const void *>(bo1.gpu_address()),
+                        static_cast<unsigned>(sdma_write_length));
+
+                    // submit packet and wait for the completion of the job
+                    exec_cs_helper_raw(ctx, ip_type, ring_id,
+                                       copy_packet.get_packet(), copy_packet.size_in_bytes(),
+                                       (int)resources.size(), resources.data(), false);
+                } else if (ip_type == AMDGPU_HW_IP_GFX || ip_type == AMDGPU_HW_IP_COMPUTE) {
+                    // TODO: fill copy packet of GFX or COMPUTE
+                }
+
+
+                // verify the result
+                int i = 0;
+                auto cpu_addr = reinterpret_cast<uint8_t *>(bo2.cpu_address());
+                while (i < sdma_write_length)
+                    ASSERT_EQ(cpu_addr[i++], 0xaa);
+
+                loop2++;
+            }
+            loop1++;
         }
     }
 }
@@ -165,6 +244,10 @@ TEST_F(BasicTest, GFXDispatchTest) {
     }
 }
 
+TEST_F(BasicTest, SDMACommandSubmission) {
+    command_submission_copy_linear_helper(AMDGPU_HW_IP_DMA);
+}
+
 TEST_F(BasicTest, EvictionTest) {
     const int sdma_write_length = 1024;
     int r;
@@ -224,6 +307,24 @@ TEST_F(BasicTest, EvictionTest) {
             resources.insert(resources.end(),
                              {bo1.handle(), bo2.handle(), vram_max[loop2].handle(), gtt_max[loop2].handle()});
 
+            SDMACopyDataPacket copy_packet(
+                reinterpret_cast<void *>(bo2.gpu_address()),
+                reinterpret_cast<void *>(bo1.cpu_address()),
+                static_cast<unsigned>(sdma_write_length));
+
+
+            exec_cs_helper_raw(ctx, AMDGPU_HW_IP_DMA, 0,
+                               copy_packet.get_packet(), copy_packet.size_in_bytes(),
+                               (int)resources.size(), resources.data(),
+                               false);
+
+            // verify if SDMA test result meets with expected
+            int i = 0;
+            auto bo2_cpu = reinterpret_cast<uint8_t *>(bo2.cpu_address());
+            while (i < sdma_write_length) {
+                ASSERT_EQ(bo2_cpu[i], 0xaa);
+                i++;
+            }
 
             ++loop2;
         }

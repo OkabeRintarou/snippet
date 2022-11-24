@@ -2,7 +2,9 @@ BINS=half_adder_tb \
 	 timescale_example_1 \
 	 timescale_example_2 \
 	 timescale_example_3 \
-	 half_adder_procedural_tb
+	 half_adder_procedural_tb \
+	 read_file_ex \
+	 write_file_ex
 
 all:$(BINS)
 
@@ -16,6 +18,10 @@ timescale_example_1:timescale_example_1.v
 timescale_example_2:timescale_example_2.v
 	iverilog -o $@ $<
 timescale_example_3:timescale_example_3.v
+	iverilog -o $@ $<
+read_file_ex:read_file_ex.v
+	iverilog -o $@ $<
+write_file_ex:write_file_ex.v
 	iverilog -o $@ $<
 
 run: half_adder_tb

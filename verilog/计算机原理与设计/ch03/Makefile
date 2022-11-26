@@ -1,8 +1,10 @@
-BINS=add1_tb
+BINS=add1_tb add4_tb
 
 all:$(BINS)
 
 add1_tb:add1_tb.v 
+	iverilog -g2012 -o $@ $<
+add4_tb:add4_tb.v
 	iverilog -g2012 -o $@ $<
 
 .PHONY:clean

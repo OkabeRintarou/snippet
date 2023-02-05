@@ -3,6 +3,8 @@ project(ogldev)
 
 set(CMAKE_CXX_STANDARD 20)
 
+find_package(glm REQUIRED NO_MODULE)
+
 add_library(util STATIC util.cpp)
 add_executable(tutorial01 tutorial01.cpp)
 target_link_libraries(tutorial01 GL glut)
@@ -12,3 +14,5 @@ add_executable(tutorial04 tutorial04.cpp)
 target_link_libraries(tutorial04 util GL GLEW glut)
 add_executable(tutorial05 tutorial05.cpp)
 target_link_libraries(tutorial05 util GL GLEW glut)
+add_executable(tutorial06 tutorial06.cpp)
+target_link_libraries(tutorial06 util GL GLEW glut)

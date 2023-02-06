@@ -24,3 +24,8 @@ add_executable(tutorial09 tutorial09.cpp)
 target_link_libraries(tutorial09 util GL GLEW glut)
 add_executable(tutorial10 tutorial10.cpp)
 target_link_libraries(tutorial10 util GL GLEW glut)
+
+
+
+add_executable(indirect-draw indirect-draw.cpp)
+target_link_libraries(indirect-draw util GL GLEW glut)

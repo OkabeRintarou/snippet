@@ -29,3 +29,5 @@ target_link_libraries(tutorial10 util GL GLEW glut)
 
 add_executable(indirect-draw indirect-draw.cpp)
 target_link_libraries(indirect-draw util GL GLEW glut)
+add_executable(transform-feedback-example1 transform-feedback-example1.cpp)
+target_link_libraries(transform-feedback-example1 util GL GLEW glut)

@@ -1,0 +1,13 @@
+. common.sh
+ROCM_COMGR_OUTPUT=$ROCM_OUTPUT/comgr/
+CLANG_PATH=$ROCM_OUTPUT/llvm/lib/cmake/clang
+LLD_PATH=$ROCM_OUTPUT/llvm/lib/cmake/lld
+DEVICE_LIBS_PATH=$ROCM_OUTPUT/rocm-device-libs/lib/cmake/AMDDeviceLibs
+
+mkdir -p $ROCM_COMGR_OUTPUT && cd $ROCM_COMGR_OUTPUT
+cmake -DCMAKE_INSTALL_PREFIX=$ROCM_COMGR_OUTPUT -DCMAKE_BUILD_TYPE=$RELEASE_TYPE \
+	-DCMAKE_PREFIX_PATH="$CLANG_PATH;$LLD_PATH;$DEVICE_LIBS_PATH" \
+	$ROCM_ROOT/ROCm-CompilerSupport/lib/comgr/
+
+make -j12
+make install

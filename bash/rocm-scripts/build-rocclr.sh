@@ -1,0 +1,14 @@
+. common.sh
+ROCM_ROCCLR_OUTPUT=$ROCM_OUTPUT/rocclr/
+OPENCL_DIR=$ROCM_ROOT/ROCm-OpenCL-Runtime
+
+COMGR_PATH=$ROCM_OUTPUT/comgr/lib/cmake/amd_comgr/
+ROCR_PATH=$ROCM_OUTPUT/rocr-runtime/lib/cmake/hsa-runtime64/
+
+mkdir -p $ROCM_ROCCLR_OUTPUT && cd $ROCM_ROCCLR_OUTPUT
+cmake -DCMAKE_INSTALL_PREFIX=$ROCM_ROCCLR_OUTPUT -DCMAKE_BUILD_TYPE=$RELEASE_TYPE \
+	-DCMAKE_PREFIX_PATH="$COMGR_PATH;$ROCR_PATH" \
+	$ROCM_ROOT/ROCclr/
+
+make -j12
+make install

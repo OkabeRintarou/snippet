@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13.4)
-project(TestLLVM CXX)
+project(TestLLVM LANGUAGES C CXX)
 
 find_package(LLVM REQUIRED CONFIG)
 
@@ -19,3 +19,5 @@ add_executable(${BINARY} ${SOURCES})
 llvm_map_components_to_libnames(llvm_libs support core irreader)
 
 target_link_libraries(${BINARY} ${llvm_libs} gtest)
+
+add_subdirectory(Pass)
